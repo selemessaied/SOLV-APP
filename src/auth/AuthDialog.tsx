@@ -4,7 +4,6 @@ import Button from '@/shared/components/Button';
 import google from '/google.svg';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../Home/Home.css';
 
 const Auth = () => {
   const { loginWithPopup, loading, currentUser } = userAuth();
@@ -23,7 +22,6 @@ const Auth = () => {
     <>
       {!loading && !currentUser && (
         <div className="relative h-[100vh] bg-cover bg-no-repeat">
-          <div className="absolute z-10 h-full w-full bg-black/40 backdrop-blur-[6px] " />
           <div className="absolute right-0 left-0 top-0 bottom-0 z-30 flex h-[90vh] items-center justify-center gap-3">
             <div className="w-11/12 rounded-lg bg-zinc-900/90 shadow-lg backdrop-blur-sm md:w-[570px]">
               <div className="my-6 flex w-full flex-col items-center justify-center p-4">
