@@ -6,15 +6,13 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   FacebookAuthProvider,
-  TwitterAuthProvider,
-  getRedirectResult
+  TwitterAuthProvider
 } from 'firebase/auth';
 import { doc, setDoc, Timestamp, onSnapshot } from 'firebase/firestore';
 import { getDoc } from 'firebase/firestore';
 import { auth, db } from '@/utils/firebase';
 import { getAuthError } from '@/shared/helpers/getAuthError.helper';
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
 import Auth from '@/auth/AuthDialog';
 
 export interface AuthContextInterface {
@@ -33,8 +31,6 @@ export const AuthProvider = ({ children }: any) => {
   const [currentUser, setCurrentUser] = useState<User>();
   const [userData, setUserData] = useState<any>();
   const [loading, setLoading] = useState(true);
-
-  const navigate = useNavigate();
 
   const logout = async () => {
     return signOut(auth);
@@ -96,9 +92,8 @@ export const AuthProvider = ({ children }: any) => {
           email: user.email,
           id: user.uid,
           dateCreated: Timestamp.fromDate(new Date()),
-          boarded: 'active'
+          role: 'normal'
         });
-        navigate('/albums/new');
       } catch (error) {
         console.error(getAuthError('err'));
       }

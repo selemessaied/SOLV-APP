@@ -3,8 +3,6 @@ import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import Header from './layout/Header';
 import Book from './pages/Book/Book';
-import NewBook from './pages/Book/components/NewBook';
-import NewRiddle from './pages/Book/Riddle/components/NewRiddle';
 import Riddle from './pages/Book/Riddle/Riddle';
 import Home from './pages/Home/Home';
 
@@ -17,9 +15,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/:bookId" element={<Book />} />
-            <Route path="/new-book" element={<NewBook />} />
             <Route path="/:bookId/:riddleId" element={<Riddle />} />
-            <Route path="/:bookId/new-riddle" element={<NewRiddle />} />
           </Routes>
         </AuthProvider>
 

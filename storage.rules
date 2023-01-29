@@ -4,5 +4,26 @@ service firebase.storage {
     match /{allPaths=**} {
       allow read, write: if false;
     }
+
+
+  //Functions
+  function isSignedIn() {
+    return request.auth != null;
+  }
+  function isAdmin() {
+    return firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == "admin"
+  }
+
+
+    match /books/{bookId}/{fileName} {
+      allow read: if true;
+      allow write: if isSignedIn() && isAdmin()
+    }
+  
+		match /books/{bookId}/riddles/{riddleId}/{fileName} {
+      allow read: if true;
+      allow write: if isSignedIn() && isAdmin()
+    }
+
   }
 }

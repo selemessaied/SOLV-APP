@@ -25,8 +25,10 @@ const Auth = () => {
           <div className="absolute right-0 left-0 top-0 bottom-0 z-30 flex h-[90vh] items-center justify-center gap-3">
             <div className="w-11/12 rounded-lg bg-zinc-900/90 shadow-lg backdrop-blur-sm md:w-[570px]">
               <div className="my-6 flex w-full flex-col items-center justify-center p-4">
-                <a href="/">SOLV</a>
-                Admin
+                <div className="text-white text-xl">
+                  <a href="/">SOLV</a> <br />
+                  Admin
+                </div>
                 <hr />
                 <div className="my-5 flex w-full flex-col items-center justify-center gap-2">
                   <Button
