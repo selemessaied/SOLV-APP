@@ -32,7 +32,7 @@ const NewRiddle = ({ onConfirmed, bookId }: NewRiddleProps) => {
     resolver: zodResolver(bookSchema)
   });
 
-  const uploadFile = async (file: File, id: string) => {
+  const uploadFile = async (file: any, id: string) => {
     if (file && file.length) {
       console.log('file', file);
       const ext = file[0].name.split('.').pop();
