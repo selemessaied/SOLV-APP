@@ -12,7 +12,7 @@ const Header = () => {
     <>
       <div className="flex h-16 w-full items-center justify-between">
         <Link aria-label="home" to="/">
-          SOLV
+          SOLV Admin
         </Link>
         {currentUser?.uid && (
           <div className="flex gap-3">
