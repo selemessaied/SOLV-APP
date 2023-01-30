@@ -27,7 +27,6 @@ const NewBook = ({ onConfirmed }: NewBookProps) => {
     resolver: zodResolver(bookSchema)
   });
   const onSubmit = (data: FormData) => {
-    console.log(data);
     const promise = new Promise<void>(async (resolve, reject) => {
       try {
         await addDoc(collection(db, 'books'), {

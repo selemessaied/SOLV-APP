@@ -36,7 +36,6 @@ const Home = () => {
             ...doc.data(),
             id: doc.id
           }));
-          console.log(allBooks);
 
           setBooks(allBooks);
         });
