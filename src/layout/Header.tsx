@@ -6,7 +6,7 @@ import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
 
 const Header = () => {
-  const { loading, currentUser, logout } = userAuth();
+  const { currentUser, logout } = userAuth();
 
   return (
     <>
@@ -16,7 +16,7 @@ const Header = () => {
         </Link>
         {currentUser?.uid && (
           <div className="flex gap-3">
-            <Button onClick={logout} disabled={loading} color="google">
+            <Button onClick={logout} color="google">
               <div className="flex items-center justify-between gap-2 text-sm">
                 <span>Logout</span>
                 <ArrowRightOnRectangleIcon className="h-4 text-black" />
