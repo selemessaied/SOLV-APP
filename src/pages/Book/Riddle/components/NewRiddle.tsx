@@ -11,6 +11,7 @@ import { z } from 'zod';
 export interface Riddle {
   id: string;
   name: string;
+  answer: string;
   bookId: string;
   successMsgType: string;
   successMsgText: string;
