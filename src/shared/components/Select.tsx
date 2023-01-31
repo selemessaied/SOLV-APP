@@ -10,10 +10,11 @@ interface OptionProps {
 export interface SelectProps {
   options: OptionProps[];
   onChange: (value: string) => void;
+  initValue?: OptionProps;
 }
 
-const Select = ({ options, onChange }: SelectProps) => {
-  const [selected, setSelected] = useState(options[0]);
+const Select = ({ options, onChange, initValue }: SelectProps) => {
+  const [selected, setSelected] = useState(initValue ?? options[0]);
   const handleChange = (e: any) => {
     setSelected(e);
     onChange(e.value);

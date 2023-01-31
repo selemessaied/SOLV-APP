@@ -1,14 +1,14 @@
-import { userAuth } from '@/contexts/AuthContext';
-import { useBookStore } from '@/contexts/store';
-import Button from '@/shared/components/Button';
-import { db } from '@/utils/firebase';
-import { Transition, Dialog } from '@headlessui/react';
-import { ArrowLeftIcon, PuzzlePieceIcon } from '@heroicons/react/24/outline';
-import { Unsubscribe } from 'firebase/auth';
-import { query, collection, orderBy, onSnapshot } from 'firebase/firestore';
-import { Fragment, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import NewRiddle from './Riddle/components/NewRiddle';
+import { userAuth } from "@/contexts/AuthContext";
+import { useBookStore } from "@/contexts/store";
+import Button from "@/shared/components/Button";
+import { db } from "@/utils/firebase";
+import { Transition, Dialog } from "@headlessui/react";
+import { ArrowLeftIcon, PuzzlePieceIcon } from "@heroicons/react/24/outline";
+import { Unsubscribe } from "firebase/auth";
+import { query, collection, orderBy, onSnapshot } from "firebase/firestore";
+import { Fragment, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import NewRiddle from "./Riddle/components/NewRiddle";
 
 const Book = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,7 +19,7 @@ const Book = () => {
   const bookId = params.bookId;
   const navigate = useNavigate();
   const onBack = () => {
-    navigate('/');
+    navigate("/");
   };
 
   const onViewRiddle = (id: string) => {
@@ -28,26 +28,26 @@ const Book = () => {
 
   useEffect(() => {
     if (!loading && !currentUser) {
-      navigate('/');
+      navigate("/");
       return;
     } else if (currentUser?.uid) {
       let unsub: Unsubscribe;
       try {
         const q = query(
-          collection(db, 'books', bookId!, 'riddles'),
-          orderBy('date', 'desc')
+          collection(db, "books", bookId!, "riddles"),
+          orderBy("date", "desc")
         );
         unsub = onSnapshot(q, (querySnapshot) => {
           const allRiddles = querySnapshot.docs.map((doc) => ({
             ...doc.data(),
-            id: doc.id
+            id: doc.id,
           }));
 
           setRiddles(allRiddles);
         });
       } catch (e) {
         console.error(
-          'Something went wrong while fetching riddles.',
+          "Something went wrong while fetching riddles.",
           e?.toString()
         );
       }
@@ -70,10 +70,10 @@ const Book = () => {
         </div>
       </div>
 
-      <div className="font-bold my-2">{bookData.name}</div>
-      <div className="w-full flex justify-between items-center">
-        <span className="text-2xl my-5">Riddles</span>
-        <Button onClick={() => setIsOpen(true)} color={'primary'}>
+      <div className="my-2 font-bold">{bookData.name}</div>
+      <div className="flex w-full items-center justify-between">
+        <span className="my-5 text-2xl">Riddles</span>
+        <Button onClick={() => setIsOpen(true)} color={"primary"}>
           New Riddle
         </Button>
       </div>
@@ -123,12 +123,6 @@ const Book = () => {
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                  <Dialog.Title
-                    as="h3"
-                    className="text-lg font-medium leading-6 text-gray-900"
-                  >
-                    New Riddle
-                  </Dialog.Title>
                   <NewRiddle
                     onConfirmed={() => setIsOpen(false)}
                     bookId={bookId!}

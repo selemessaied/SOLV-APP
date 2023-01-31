@@ -19,6 +19,11 @@ service firebase.storage {
       allow read: if true;
       allow write: if isSignedIn() && isAdmin()
     }
+    
+    match /books/{bookId}/riddles/{riddleId} {
+      allow read: if true;
+      allow write: if isSignedIn() && isAdmin()
+    }
   
 		match /books/{bookId}/riddles/{riddleId}/{fileName} {
       allow read: if true;
