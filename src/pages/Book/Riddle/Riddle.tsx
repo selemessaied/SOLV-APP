@@ -9,6 +9,7 @@ import { Fragment, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useParams, useNavigate } from "react-router-dom";
 import EditRiddle from "./components/EditRiddle";
+import MediaCheck from "./components/MediaCheck";
 
 const Riddle = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -40,7 +41,7 @@ const Riddle = () => {
         });
         await Promise.all(promise);
         navigate("/" + bookId);
-        resolve;
+        resolve("e");
       } catch (e) {
         rej;
         console.error(e);
@@ -102,33 +103,109 @@ const Riddle = () => {
         </button>
       </div>
       {riddleData && (
-        <div className="flex flex-col gap-3">
-          <div>Name: {riddleData.name}</div>
-          <div>Added by: {riddleData.addedBy}</div>
+        <div className="mb-10 flex flex-col gap-3 py-10">
+          <div>
+            Name: <b></b>
+            {riddleData.name}
+          </div>
+          <div>
+            Added by: <b></b>
+            {riddleData.addedBy}
+          </div>
           <div>
             Riddle image:{" "}
             <img
-              className="h-25 w-25 object-cover"
+              className="h-32 w-32 object-cover"
               src={riddleData.riddleImage}
             />
           </div>
-          <div>Answer: {riddleData.answer}</div>
           <div>
-            Date: {riddleData.date.toDate().toLocaleDateString("fr-FR")}
+            Answer: <b>{riddleData.answer}</b>
           </div>
-          <div>Hint 1 type: {riddleData.hintType}</div>
-          <div>Hint 1 text: {riddleData.hintText}</div>
-          <div>Hint 1 media: (media here)</div>
-          <div>Hint 2 type: {riddleData.hint2Type}</div>
-          <div>Hint 2 text: {riddleData.hint2Text}</div>
-          <div>Hint 2 media: (media here)</div>
-          <div>Hint 3 type: {riddleData.hint3Type}</div>
-          <div>Hint 3 text: {riddleData.hint3Text}</div>
-          <div>Hint 3 media: (media here)</div>
-          <div>Success msg type: {riddleData.successMsgType}</div>
-          <div>Success msg text: {riddleData.successMsgText}</div>
-          <div>Success msg media: (media here)</div>
-          <div>Link: {"/books/" + bookId + "/riddles/" + riddleId}</div>
+          <div>
+            Date: <b>{riddleData.date.toDate().toLocaleDateString("fr-FR")}</b>
+          </div>
+          <div>
+            Number hints: <b>{riddleData.numberHints}</b>
+          </div>
+          {riddleData.numberHints > 0 && (
+            <>
+              <div>
+                Hint 1 type: <b>{riddleData.hintType}</b>
+              </div>
+              <div>
+                Hint 1 text: <b>{riddleData.hintText}</b>
+              </div>
+              <MediaCheck
+                riddleData={riddleData}
+                inputValue={"Hint 1"}
+                inputLabel={"hint"}
+              />
+            </>
+          )}
+          {riddleData.numberHints > 1 && (
+            <>
+              <div>
+                Hint 2 type: <b></b>
+                {riddleData.hint2Type}
+              </div>
+              <div>
+                Hint 2 text: <b></b>
+                {riddleData.hint2Text}
+              </div>
+              <MediaCheck
+                riddleData={riddleData}
+                inputValue={"Hint 2"}
+                inputLabel={"hint2"}
+              />
+            </>
+          )}
+          {riddleData.numberHints > 2 && (
+            <>
+              <div>
+                Hint 3 type: <b>{riddleData.hint3Type}</b>
+              </div>
+              <div>
+                Hint 3 text: <b></b>
+                {riddleData.hint3Text}
+              </div>
+              <MediaCheck
+                riddleData={riddleData}
+                inputValue={"Hint 3"}
+                inputLabel={"hint3"}
+              />
+            </>
+          )}
+          {riddleData.numberHints > 3 && (
+            <>
+              <div>
+                Hint 4 type: <b>{riddleData.hint4Type}</b>
+              </div>
+              <div>
+                Hint 4 text: <b></b>
+                {riddleData.hint4Text}
+              </div>
+              <MediaCheck
+                riddleData={riddleData}
+                inputValue={"Hint 4"}
+                inputLabel={"hint4"}
+              />
+            </>
+          )}
+          <div>
+            Success msg type: <b> {riddleData.successMsgType}</b>
+          </div>
+          <div>
+            Success msg text: <b>{riddleData.successMsgText}</b>
+          </div>
+          <MediaCheck
+            riddleData={riddleData}
+            inputValue={"Success Message"}
+            inputLabel={"successMsg"}
+          />
+          <div>
+            Link: <b>{"/books/" + bookId + "/riddles/" + riddleId}</b>
+          </div>
         </div>
       )}
 
@@ -151,7 +228,8 @@ const Riddle = () => {
           </Transition.Child>
 
           <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4 text-center">
+            {/* Container to center the panel */}
+            <div className="flex min-h-full items-center justify-center p-4">
               <Transition.Child
                 as={Fragment}
                 enter="ease-out duration-300"
@@ -226,7 +304,7 @@ const Riddle = () => {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <Dialog.Panel className="flex w-full max-w-[860px] transform items-center justify-center overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                   <EditRiddle
                     onConfirmed={() => setIsOpen(false)}
                     riddleData={riddleData}

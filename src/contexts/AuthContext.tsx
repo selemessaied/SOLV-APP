@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect, createContext } from 'react';
+import { useContext, useState, useEffect, createContext } from "react";
 import {
   signOut,
   onAuthStateChanged,
@@ -6,14 +6,14 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   FacebookAuthProvider,
-  TwitterAuthProvider
-} from 'firebase/auth';
-import { doc, setDoc, Timestamp, onSnapshot } from 'firebase/firestore';
-import { getDoc } from 'firebase/firestore';
-import { auth, db } from '@/utils/firebase';
-import { getAuthError } from '@/shared/helpers/getAuthError.helper';
-import toast from 'react-hot-toast';
-import Auth from '@/auth/AuthDialog';
+  TwitterAuthProvider,
+} from "firebase/auth";
+import { doc, setDoc, Timestamp, onSnapshot } from "firebase/firestore";
+import { getDoc } from "firebase/firestore";
+import { auth, db } from "@/utils/firebase";
+import { getAuthError } from "@/shared/helpers/getAuthError.helper";
+import toast from "react-hot-toast";
+import Auth from "@/auth/AuthDialog";
 
 export interface AuthContextInterface {
   currentUser: User | undefined;
@@ -38,22 +38,22 @@ export const AuthProvider = ({ children }: any) => {
 
   const getProvider = (provider: string) => {
     switch (provider) {
-      case 'google': {
+      case "google": {
         return new GoogleAuthProvider();
       }
-      case 'google.com': {
+      case "google.com": {
         return new GoogleAuthProvider();
       }
-      case 'twitter': {
+      case "twitter": {
         return new TwitterAuthProvider();
       }
-      case 'twitter.com': {
+      case "twitter.com": {
         return new TwitterAuthProvider();
       }
-      case 'facebook': {
+      case "facebook": {
         return new FacebookAuthProvider();
       }
-      case 'facebook.com': {
+      case "facebook.com": {
         return new FacebookAuthProvider();
       }
       default: {
@@ -74,28 +74,31 @@ export const AuthProvider = ({ children }: any) => {
         console.log(error.toString());
         console.error(getAuthError(error.code));
         console.error(error);
-        if (error.code === 'auth/account-exists-with-different-credential') {
-          toast.error('You have used the same email with an another provider!');
+        if (error.code === "auth/account-exists-with-different-credential") {
+          toast.error(
+            "You have used the same email with an another provider!",
+            { duration: 5000 }
+          );
         }
       });
   };
 
   const checkUserExists = async (user: User, provider: string) => {
-    const docRef = doc(db, 'users', user.uid);
+    const docRef = doc(db, "users", user.uid);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       return;
     } else {
       try {
-        await setDoc(doc(db, 'users', user.uid), {
+        await setDoc(doc(db, "users", user.uid), {
           name: user.displayName,
           email: user.email,
           id: user.uid,
           dateCreated: Timestamp.fromDate(new Date()),
-          role: 'normal'
+          role: "normal",
         });
       } catch (error) {
-        console.error(getAuthError('err'));
+        console.error(getAuthError("err"));
       }
     }
   };
@@ -109,7 +112,7 @@ export const AuthProvider = ({ children }: any) => {
       return;
     }
     setCurrentUser(user);
-    onSnapshot(doc(db, 'users', user.uid), (doc) => {
+    onSnapshot(doc(db, "users", user.uid), (doc) => {
       setUserData(doc.data());
     });
   };
@@ -124,7 +127,7 @@ export const AuthProvider = ({ children }: any) => {
     userData,
     loading,
     logout,
-    loginWithPopup
+    loginWithPopup,
   };
 
   return (

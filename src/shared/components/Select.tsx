@@ -1,6 +1,6 @@
-import { Listbox, Transition } from '@headlessui/react';
-import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/outline';
-import { Fragment, useState } from 'react';
+import { Listbox, Transition } from "@headlessui/react";
+import { ChevronUpDownIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { Fragment, useState } from "react";
 
 interface OptionProps {
   label: string;
@@ -9,7 +9,7 @@ interface OptionProps {
 
 export interface SelectProps {
   options: OptionProps[];
-  onChange: (value: string) => void;
+  onChange: (value: string | number) => void;
   initValue?: OptionProps;
 }
 
@@ -38,13 +38,13 @@ const Select = ({ options, onChange, initValue }: SelectProps) => {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Listbox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+            <Listbox.Options className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
               {options.map((person, personIdx) => (
                 <Listbox.Option
                   key={personIdx}
                   className={({ active }) =>
                     `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                      active ? 'bg-zinc-100 text-zinc-900' : 'text-gray-900'
+                      active ? "bg-zinc-100 text-zinc-900" : "text-gray-900"
                     }`
                   }
                   value={person}
@@ -53,7 +53,7 @@ const Select = ({ options, onChange, initValue }: SelectProps) => {
                     <>
                       <span
                         className={`block truncate ${
-                          selected ? 'font-medium' : 'font-normal'
+                          selected ? "font-medium" : "font-normal"
                         }`}
                       >
                         {person.label}

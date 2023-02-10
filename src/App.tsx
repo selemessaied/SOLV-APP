@@ -1,10 +1,10 @@
-import { Toaster } from 'react-hot-toast';
-import { Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import Header from './layout/Header';
-import Book from './pages/Book/Book';
-import Riddle from './pages/Book/Riddle/Riddle';
-import Home from './pages/Home/Home';
+import { Toaster } from "react-hot-toast";
+import { Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import Header from "./layout/Header";
+import Book from "./pages/Book/Book";
+import Riddle from "./pages/Book/Riddle/Riddle";
+import Home from "./pages/Home/Home";
 
 const App = () => {
   return (
@@ -26,12 +26,11 @@ const App = () => {
           containerClassName=""
           containerStyle={{}}
           toastOptions={{
-            className: '',
-            duration: 5000,
+            className: "",
             style: {
-              background: '#000',
-              color: '#fff'
-            }
+              background: "#000",
+              color: "#fff",
+            },
           }}
         />
       </div>
