@@ -47,26 +47,14 @@ const NewRiddle = ({ onConfirmed, bookId }: NewRiddleProps) => {
           }
         );
       });
-      const DLink = await url;
-
-      await setDoc(
-        doc(db, "books", bookId, "riddles", id),
-        {
-          [field]: DLink,
-        },
-        { merge: true }
-      );
+      return url;
     }
   };
   const defaultValues = {
     successMsgType: "text",
-    hintType: "text",
-    hint2Type: "text",
-    hint3Type: "text",
-    hint4Type: "text",
-    numberHints: 0,
   };
   const onSubmit = (data: FormData) => {
+    console.log(data);
     setIsLoading(true);
     const promise = new Promise<void>(async (resolve, reject) => {
       try {
@@ -76,15 +64,6 @@ const NewRiddle = ({ onConfirmed, bookId }: NewRiddleProps) => {
             name: data.name,
             addedBy: currentUser!.uid,
             date: Timestamp.fromDate(new Date()),
-            hintType: data.hintType,
-            numberHints: data.numberHints,
-            hintText: data.hintText || "",
-            hint2Type: data.hint2Type,
-            hint2Text: data.hint2Text || "",
-            hint3Type: data.hint3Type,
-            hint3Text: data.hint3Text || "",
-            hint4Type: data.hint4Type,
-            hint4Text: data.hint4Text || "",
             successMsgType: data.successMsgType,
             successMsgText: data.successMsgText || "",
             answer: data.answer,
@@ -92,26 +71,66 @@ const NewRiddle = ({ onConfirmed, bookId }: NewRiddleProps) => {
           }
         );
         setCurrentMediaUpload("riddle image");
-        await uploadFile("riddleImage", data.riddleImage, docRef.id);
-        if (data.hintType !== "text") {
-          setCurrentMediaUpload("hint 1 media");
-          await uploadFile("hintMedia", data.hintMedia, docRef.id);
-        }
-        if (data.hint2Type !== "text") {
-          setCurrentMediaUpload("hint 2 media");
-          await uploadFile("hint2Media", data.hint2Media, docRef.id);
-        }
-        if (data.hint3Type !== "text") {
-          setCurrentMediaUpload("hint 3 media");
-          await uploadFile("hint3Media", data.hint3Media, docRef.id);
-        }
-        if (data.hint4Type !== "text") {
-          setCurrentMediaUpload("hint 4 media");
-          await uploadFile("hint4Media", data.hint4Media, docRef.id);
-        }
+        const riddleImageLink = await uploadFile(
+          "riddleImage",
+          data.riddleImage,
+          docRef.id
+        );
+
+        await setDoc(
+          doc(db, "books", bookId, "riddles", docRef.id),
+          {
+            riddleImage: riddleImageLink,
+          },
+          { merge: true }
+        );
+
+        const promise = data.hints.map(async (hint, index) => {
+          if (hint.type !== "text") {
+            setCurrentMediaUpload(`hint ${index} media`);
+            const link = await uploadFile(
+              `hint${index}Media`,
+              hint.media,
+              docRef.id
+            );
+            return addDoc(
+              collection(db, "books", bookId, "riddles", docRef.id, "hints"),
+              {
+                text: hint.text,
+                id: hint.id,
+                media: link,
+                type: hint.type,
+              }
+            );
+          } else {
+            return addDoc(
+              collection(db, "books", bookId, "riddles", docRef.id, "hints"),
+              {
+                text: hint.text,
+                id: hint.id,
+                type: hint.type,
+              }
+            );
+          }
+        });
+
+        await Promise.all(promise);
+
         if (data.successMsgType !== "text") {
           setCurrentMediaUpload("success message media");
-          await uploadFile("successMsgMedia", data.successMsgMedia, docRef.id);
+          const successMediaLink = await uploadFile(
+            "successMsgMedia",
+            data.successMsgMedia,
+            docRef.id
+          );
+
+          await setDoc(
+            doc(db, "books", bookId, "riddles", docRef.id),
+            {
+              successMsgMedia: successMediaLink,
+            },
+            { merge: true }
+          );
         }
         resolve();
         setIsLoading(false);

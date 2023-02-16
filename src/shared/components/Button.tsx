@@ -7,14 +7,7 @@ export interface ButtonProps {
   disabled?: boolean;
   width?: string;
   type?: "button" | "submit" | "reset" | undefined;
-  color:
-    | "primary"
-    | "secondary"
-    | "lightGray"
-    | "facebook"
-    | "email"
-    | "google"
-    | "twitter";
+  color: "primary" | "secondary" | "lightGray" | "red";
   onClick?: () => void;
 }
 
@@ -24,7 +17,7 @@ const Button = ({
   width,
   disabled,
   onClick,
-  color
+  color,
 }: ButtonProps) => {
   const handleClick = () => {
     if (disabled) {
@@ -39,9 +32,7 @@ const Button = ({
       onClick={() => handleClick()}
       className={classNames(
         { "w-full": width === "full" },
-        { "bg-[#1777F2]": color === "facebook" },
-        { "bg-[#1DA1F2]": color === "twitter" },
-        { "bg-zinc-800 text-white": color === "email" },
+        { "bg-red-500": color === "red" },
         { "cursor-not-allowed bg-opacity-40 hover:bg-opacity-40": disabled },
         { "bg-zinc-200 text-black": color === "secondary" },
         { "bg-black text-white": color === "primary" },

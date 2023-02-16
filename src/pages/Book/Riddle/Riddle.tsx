@@ -3,7 +3,13 @@ import { db, storage } from "@/utils/firebase";
 import { Transition, Dialog } from "@headlessui/react";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { Unsubscribe } from "firebase/auth";
-import { onSnapshot, doc, deleteDoc } from "firebase/firestore";
+import {
+  onSnapshot,
+  doc,
+  deleteDoc,
+  collection,
+  query,
+} from "firebase/firestore";
 import { ref, deleteObject, listAll } from "firebase/storage";
 import { Fragment, useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -15,6 +21,7 @@ const Riddle = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [deleteModalOpen, setDeleteModal] = useState(false);
   const [riddleData, setRiddleData] = useState<any>();
+  const [hintsData, setHintsData] = useState<any>();
   const { currentUser, loading } = userAuth();
   const params = useParams();
   const bookId = params.bookId;
@@ -32,6 +39,19 @@ const Riddle = () => {
     setDeleteModal(false);
     const promise = new Promise(async (resolve, rej) => {
       try {
+        hintsData.map(async (hint: any) => {
+          await deleteDoc(
+            doc(
+              db,
+              "books",
+              bookId!,
+              "riddles",
+              riddleId!,
+              "hints",
+              hint.fireId
+            )
+          );
+        });
         await deleteDoc(doc(db, "books", bookId!, "riddles", riddleId!));
         const storageRef = ref(storage, `books/${bookId}/riddles/${riddleId}/`);
 
@@ -61,7 +81,19 @@ const Riddle = () => {
       return;
     } else if (currentUser?.uid) {
       let unsub: Unsubscribe;
+      let unsubHints: Unsubscribe;
       try {
+        const q = query(
+          collection(db, "books", bookId!, "riddles", riddleId!, "hints")
+        );
+        unsub = onSnapshot(q, (querySnapshot) => {
+          const allHints = querySnapshot.docs.map((doc) => ({
+            ...doc.data(),
+            fireId: doc.id,
+          }));
+
+          setHintsData(allHints);
+        });
         unsub = onSnapshot(
           doc(db, "books", bookId!, "riddles", riddleId!),
           (doc) => {
@@ -74,6 +106,9 @@ const Riddle = () => {
       return () => {
         if (unsub) {
           unsub();
+        }
+        if (unsubHints) {
+          unsubHints();
         }
       };
     }
@@ -126,72 +161,31 @@ const Riddle = () => {
             Date: <b>{riddleData.date.toDate().toLocaleDateString("fr-FR")}</b>
           </div>
           <div>
-            Number hints: <b>{riddleData.numberHints}</b>
+            Number hints: <b>{hintsData.length}</b>
           </div>
-          {riddleData.numberHints > 0 && (
-            <>
-              <div>
-                Hint 1 type: <b>{riddleData.hintType}</b>
-              </div>
-              <div>
-                Hint 1 text: <b>{riddleData.hintText}</b>
-              </div>
-              <MediaCheck
-                riddleData={riddleData}
-                inputValue={"Hint 1"}
-                inputLabel={"hint"}
-              />
-            </>
-          )}
-          {riddleData.numberHints > 1 && (
-            <>
-              <div>
-                Hint 2 type: <b></b>
-                {riddleData.hint2Type}
-              </div>
-              <div>
-                Hint 2 text: <b></b>
-                {riddleData.hint2Text}
-              </div>
-              <MediaCheck
-                riddleData={riddleData}
-                inputValue={"Hint 2"}
-                inputLabel={"hint2"}
-              />
-            </>
-          )}
-          {riddleData.numberHints > 2 && (
-            <>
-              <div>
-                Hint 3 type: <b>{riddleData.hint3Type}</b>
-              </div>
-              <div>
-                Hint 3 text: <b></b>
-                {riddleData.hint3Text}
-              </div>
-              <MediaCheck
-                riddleData={riddleData}
-                inputValue={"Hint 3"}
-                inputLabel={"hint3"}
-              />
-            </>
-          )}
-          {riddleData.numberHints > 3 && (
-            <>
-              <div>
-                Hint 4 type: <b>{riddleData.hint4Type}</b>
-              </div>
-              <div>
-                Hint 4 text: <b></b>
-                {riddleData.hint4Text}
-              </div>
-              <MediaCheck
-                riddleData={riddleData}
-                inputValue={"Hint 4"}
-                inputLabel={"hint4"}
-              />
-            </>
-          )}
+          {/* <div className="flex flex-col gap-3 divide-y-2"> */}
+          {hintsData &&
+            hintsData.map((hint: any, index: number) => (
+              <>
+                <hr />
+                <div>
+                  Hint {index + 1} type: <b>{hint.type}</b>
+                </div>
+                {hint.type === "text" && (
+                  <div>
+                    Hint {index + 1} text: <b>{hint.text}</b>
+                  </div>
+                )}
+                <MediaCheck
+                  index={index + 1}
+                  media={hint.media}
+                  label={"hint"}
+                  type={hint.type}
+                />
+              </>
+            ))}
+          {/* </div> */}
+          <hr />
           <div>
             Success msg type: <b> {riddleData.successMsgType}</b>
           </div>
@@ -199,9 +193,10 @@ const Riddle = () => {
             Success msg text: <b>{riddleData.successMsgText}</b>
           </div>
           <MediaCheck
-            riddleData={riddleData}
-            inputValue={"Success Message"}
-            inputLabel={"successMsg"}
+            media={riddleData.successMsgMedia}
+            type={riddleData.successMsgType}
+            label={"Success Message"}
+            index={1}
           />
           <div>
             Link: <b>{"/books/" + bookId + "/riddles/" + riddleId}</b>

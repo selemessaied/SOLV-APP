@@ -28,6 +28,11 @@ service cloud.firestore {
         	 match /riddles/{riddleId} {
         	  allow read: if true;
        			allow write: if isSignedIn() && isAdmin();
+
+              match /hints/{hintId} {
+                allow read: if true;
+                allow write: if isSignedIn() && isAdmin();
+    			    }
     			 }
     }
 }
