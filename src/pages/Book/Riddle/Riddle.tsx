@@ -140,12 +140,10 @@ const Riddle = () => {
       {riddleData && (
         <div className="mb-10 flex flex-col gap-3 py-10">
           <div>
-            Name: <b></b>
-            {riddleData.name}
+            Name: <b>{riddleData.name}</b>
           </div>
           <div>
-            Added by: <b></b>
-            {riddleData.addedBy}
+            Added by: <b> {riddleData.addedBy}</b>
           </div>
           <div>
             Riddle image:{" "}
@@ -166,7 +164,7 @@ const Riddle = () => {
           {/* <div className="flex flex-col gap-3 divide-y-2"> */}
           {hintsData &&
             hintsData.map((hint: any, index: number) => (
-              <>
+              <div key={hint.id}>
                 <hr />
                 <div>
                   Hint {index + 1} type: <b>{hint.type}</b>
@@ -182,16 +180,18 @@ const Riddle = () => {
                   label={"hint"}
                   type={hint.type}
                 />
-              </>
+              </div>
             ))}
           {/* </div> */}
           <hr />
           <div>
             Success msg type: <b> {riddleData.successMsgType}</b>
           </div>
-          <div>
-            Success msg text: <b>{riddleData.successMsgText}</b>
-          </div>
+          {riddleData.successMsgType === "text" && (
+            <div>
+              Success msg text: <b>{riddleData.successMsgText}</b>
+            </div>
+          )}
           <MediaCheck
             media={riddleData.successMsgMedia}
             type={riddleData.successMsgType}
@@ -199,7 +199,10 @@ const Riddle = () => {
             index={1}
           />
           <div>
-            Link: <b>{"/books/" + bookId + "/riddles/" + riddleId}</b>
+            Link:{" "}
+            <b className="break-all">
+              {"/books/" + bookId + "/riddles/" + riddleId}
+            </b>
           </div>
         </div>
       )}
@@ -302,7 +305,7 @@ const Riddle = () => {
                 <Dialog.Panel className="flex w-full max-w-[860px] transform items-center justify-center overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                   <EditRiddle
                     onConfirmed={() => setIsOpen(false)}
-                    riddleData={riddleData}
+                    riddleData={{ ...riddleData, hints: hintsData }}
                     riddleId={riddleId!}
                     bookId={bookId!}
                   />

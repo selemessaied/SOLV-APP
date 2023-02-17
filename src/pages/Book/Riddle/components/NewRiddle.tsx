@@ -54,7 +54,6 @@ const NewRiddle = ({ onConfirmed, bookId }: NewRiddleProps) => {
     successMsgType: "text",
   };
   const onSubmit = (data: FormData) => {
-    console.log(data);
     setIsLoading(true);
     const promise = new Promise<void>(async (resolve, reject) => {
       try {

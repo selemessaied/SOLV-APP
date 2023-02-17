@@ -1,16 +1,23 @@
 import { userAuth } from "@/contexts/AuthContext";
 import LoadingCircle from "@/shared/components/LoadingCircle";
 import { storage, db } from "@/utils/firebase";
-import { setDoc, doc, Timestamp } from "firebase/firestore";
+import {
+  setDoc,
+  doc,
+  Timestamp,
+  addDoc,
+  collection,
+  deleteDoc,
+} from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import RiddleForm, { FormData, Riddle } from "./RiddleForm";
+import RiddleForm, { FormData } from "./RiddleForm";
 
 export interface EditRiddleProps {
   bookId: string;
   riddleId: string;
-  riddleData: Riddle;
+  riddleData: any;
   onConfirmed: () => void;
 }
 
@@ -31,19 +38,7 @@ const EditRiddle = ({
     successMsgType: riddleData.successMsgType,
     successMsgText: riddleData.successMsgText,
     successMsgMedia: riddleData.successMsgMedia,
-    numberHints: riddleData.numberHints,
-    hintType: riddleData.hintType,
-    hintText: riddleData.hintText,
-    hint2Type: riddleData.hint2Type,
-    hint2Text: riddleData.hint2Text,
-    hint3Type: riddleData.hint3Type,
-    hint3Text: riddleData.hint3Text,
-    hint4Type: riddleData.hint4Type,
-    hint4Text: riddleData.hint4Text,
-    hintMedia: riddleData.hintMedia,
-    hint2Media: riddleData.hint2Media,
-    hint3Media: riddleData.hint3Media,
-    hint4Media: riddleData.hint4Media,
+    hints: riddleData.hints,
     riddleImage: riddleData.riddleImage,
   };
 
@@ -75,19 +70,16 @@ const EditRiddle = ({
           }
         );
       });
-      const DLink = await url;
-
-      await setDoc(
-        doc(db, "books", bookId, "riddles", id),
-        {
-          [field]: DLink,
-        },
-        { merge: true }
-      );
+      return url;
     }
   };
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = (data: FormData, dirtyFields: any) => {
+    const getHintFireId = (id: string) => {
+      const index = riddleData.hints.findIndex((hint: any) => hint.id === id);
+      return riddleData.hints[index].fireId;
+    };
+
     setIsLoading(true);
     const promise = new Promise<void>(async (resolve, reject) => {
       try {
@@ -97,40 +89,169 @@ const EditRiddle = ({
             name: data.name,
             updatedBy: currentUser!.uid,
             updatedAt: Timestamp.fromDate(new Date()),
-            numberHints: data.numberHints,
-            hintType: data.hintType,
-            hintText: data.hintText || "",
-            hint2Type: data.hint2Type,
-            hint2Text: data.hint2Text || "",
-            hint3Type: data.hint3Type,
-            hint3Text: data.hint3Text || "",
-            hint4Type: data.hint4Type,
-            hint4Text: data.hint4Text || "",
             successMsgType: data.successMsgType,
             successMsgText: data.successMsgText || "",
             answer: data.answer,
           },
           { merge: true }
         );
-        if (data.riddleImage) {
-          await uploadFile("riddleImage", data.riddleImage, riddleId);
+        if (dirtyFields.riddleImage) {
+          setCurrentMediaUpload("riddle image");
+          const riddleImageLink = await uploadFile(
+            "riddleImage",
+            data.riddleImage,
+            riddleId
+          );
+
+          await setDoc(
+            doc(db, "books", bookId, "riddles", riddleId),
+            {
+              riddleImage: riddleImageLink,
+            },
+            { merge: true }
+          );
         }
-        if (data.hintType !== "text" && data.hintMedia) {
-          await uploadFile("hintMedia", data.hintMedia, riddleId);
+
+        const oldHintsIds = riddleData.hints.map((hint: any) => hint.id);
+        const newHintsIds = data.hints.map((hint: any) => hint.id);
+
+        if (data.hints.length > 0) {
+          data.hints.map(async (hint, index) => {
+            if (!oldHintsIds.includes(hint.id)) {
+              if (hint.type !== "text") {
+                setCurrentMediaUpload(`hint ${index} media`);
+                const link = await uploadFile(
+                  `hint${index}Media`,
+                  hint.media,
+                  riddleId
+                );
+                return addDoc(
+                  collection(db, "books", bookId, "riddles", riddleId, "hints"),
+                  {
+                    text: hint.text,
+                    id: hint.id,
+                    media: link,
+                    type: hint.type,
+                  }
+                );
+              } else {
+                return addDoc(
+                  collection(db, "books", bookId, "riddles", riddleId, "hints"),
+                  {
+                    text: hint.text,
+                    id: hint.id,
+                    type: hint.type,
+                  }
+                );
+              }
+            }
+            if (!newHintsIds.includes(hint.id)) {
+              return deleteDoc(
+                doc(
+                  db,
+                  "books",
+                  bookId!,
+                  "riddles",
+                  riddleId!,
+                  "hints",
+                  riddleData.hints[index].fireId
+                )
+              );
+            }
+          });
         }
-        if (data.hint2Type !== "text" && data.hint2Media) {
-          await uploadFile("hint2Media", data.hint2Media, riddleId);
+
+        riddleData.hints.map((hint: any) => {
+          if (!newHintsIds.includes(hint.id)) {
+            return deleteDoc(
+              doc(
+                db,
+                "books",
+                bookId!,
+                "riddles",
+                riddleId!,
+                "hints",
+                hint.fireId
+              )
+            );
+          }
+        });
+
+        if (dirtyFields.hints.length > 0) {
+          dirtyFields.hints.map(async (hintDirty: any, index: number) => {
+            const getUpdatedHintData = () => {
+              if (
+                riddleData.hints.length > 0 &&
+                riddleData.hints[index] &&
+                riddleData.hints[index].id
+              ) {
+                const idd = riddleData.hints[index].id;
+                const newIndex = data.hints.findIndex(
+                  (hint) => hint.id === idd
+                );
+                return data.hints[newIndex];
+              }
+            };
+
+            const updatedHintData = getUpdatedHintData();
+
+            if (
+              hintDirty.media &&
+              updatedHintData &&
+              updatedHintData.type !== "text"
+            ) {
+              setCurrentMediaUpload(`hint ${index} media update`);
+              const link = await uploadFile(
+                `hint${index}Media`,
+                updatedHintData.media,
+                riddleId
+              );
+              const id = getHintFireId(updatedHintData.id!);
+              await setDoc(
+                doc(db, "books", bookId, "riddles", riddleId, "hints", id),
+                {
+                  media: link,
+                  type: updatedHintData.type,
+                },
+                { merge: true }
+              );
+            } else if (
+              hintDirty.text &&
+              updatedHintData &&
+              updatedHintData.type === "text"
+            ) {
+              const id = getHintFireId(updatedHintData.id!);
+              await setDoc(
+                doc(db, "books", bookId, "riddles", riddleId, "hints", id),
+                {
+                  text: updatedHintData.text,
+                  type: updatedHintData.type,
+                },
+                { merge: true }
+              );
+            }
+          });
         }
-        if (data.hint3Type !== "text" && data.hint3Media) {
-          await uploadFile("hint3Media", data.hint3Media, riddleId);
+
+        if (dirtyFields.successMsgMedia) {
+          if (data.successMsgType !== "text") {
+            setCurrentMediaUpload("success message media");
+            const successMediaLink = await uploadFile(
+              "successMsgMedia",
+              data.successMsgMedia,
+              riddleId
+            );
+
+            await setDoc(
+              doc(db, "books", bookId, "riddles", riddleId),
+              {
+                successMsgMedia: successMediaLink,
+              },
+              { merge: true }
+            );
+          }
         }
-        if (data.hint4Type !== "text") {
-          setCurrentMediaUpload("hint 4 media");
-          await uploadFile("hint4Media", data.hint4Media, riddleId);
-        }
-        if (data.successMsgType !== "text" && data.successMsgMedia) {
-          await uploadFile("successMsgMedia", data.successMsgMedia, riddleId);
-        }
+
         resolve();
         setIsLoading(false);
         onConfirmed();

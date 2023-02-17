@@ -15,7 +15,7 @@ const MediaCheck = ({ type, index, media, label }: MediaCheckProps) => {
               <label htmlFor="step" className="font-bold text-gray-600">
                 Current {label} Image
               </label>
-              <img className="h-32 w-32 object-cover" src={media} />
+              <img className="h-72 w-72 object-cover" src={media} />
             </div>
           )}
           {media && type === "video" && (
@@ -23,10 +23,10 @@ const MediaCheck = ({ type, index, media, label }: MediaCheckProps) => {
               <label htmlFor="step" className="font-bold text-gray-600">
                 Current {label} Video
               </label>
-              <video src={media} controls />
+              <video className="h-72 w-72 object-cover" src={media} controls />
             </div>
           )}
-          {media && type === "sound" && (
+          {media && type === "audio" && (
             <div>
               <label htmlFor="step" className="font-bold text-gray-600">
                 Current {label} Audio

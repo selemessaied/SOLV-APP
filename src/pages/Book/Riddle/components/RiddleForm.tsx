@@ -6,21 +6,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
 import { Timestamp } from "firebase/firestore";
-
-// export interface Riddle {
-//   id: string;
-//   name: string;
-//   answer: string;
-//   bookId: string;
-//   successMsgType: string;
-//   successMsgText: string;
-//   successMsgMedia: string;
-//   numberHints: number;
-//   hints: HintProps[];
-//   riddleImage: string;
-//   date: any;
-//   addedBy: string;
-// }
+import MediaCheck from "./MediaCheck";
 
 // const MAX_FILE_SIZE = 500000;
 // const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -37,7 +23,7 @@ import { Timestamp } from "firebase/firestore";
 // });
 
 export interface RiddleFormProps {
-  onSubmit: (data: FormData) => void;
+  onSubmit: (data: FormData, dirtyFields: any, hintState: any) => void;
   onCancel: () => void;
   defaultValues: any;
   isEdit: boolean;
@@ -58,8 +44,8 @@ const riddleSchema = z
     answer: z.string().min(1).max(256),
     successMsgType: z.string().max(256),
     successMsgText: z.string().max(256).optional(),
-    successMsgMedia: z.instanceof(FileList).optional(),
-    riddleImage: z.instanceof(FileList),
+    successMsgMedia: z.any().optional(),
+    riddleImage: z.any(),
     hints: z.array(
       z.object({
         id: z.string().max(256).optional(),
@@ -72,7 +58,6 @@ const riddleSchema = z
     addedBy: z.string().optional(),
   })
   .superRefine((data, ctx) => {
-    console.log("riddleSchema super refine", data);
     if (data.riddleImage.length === 0) {
       ctx.addIssue({
         path: ["riddleImage"],
@@ -127,24 +112,26 @@ const RiddleForm = ({
   const {
     register,
     handleSubmit,
-
+    getValues,
+    getFieldState,
     control,
     watch,
     setValue,
-    formState: { errors },
+    formState: { errors, dirtyFields },
   } = useForm<FormData>({
     defaultValues: defaultValues,
     resolver: zodResolver(riddleSchema),
   });
 
+  const onSub = (data: any) => {
+    const hintState = getFieldState("hints");
+    onSubmit(data, dirtyFields, hintState);
+  };
+
   // watch(() => {
   //   console.log("errors", errors);
+  //   console.log("dirty", dirtyFields);
   // });
-
-  // const onSub = (data: any) => {
-  //   console.log(data);
-  //   // onSubmit(data);
-  // };
 
   const { fields, append, update, remove } = useFieldArray({
     name: "hints",
@@ -167,7 +154,7 @@ const RiddleForm = ({
         <div className="my-5 text-xl">
           {isEdit ? "Edit Riddle" : "Create New Riddle"}:
         </div>
-        <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
+        <form className="w-full" onSubmit={handleSubmit(onSub)}>
           <div className="grid w-full grid-cols-1 md:grid-cols-2">
             <div className="flex min-w-[250px] flex-col gap-1">
               <div className="flex flex-col gap-1">
@@ -187,10 +174,13 @@ const RiddleForm = ({
                   <label htmlFor="step" className="font-bold text-gray-600">
                     Riddle Image
                   </label>
+                  {isEdit && typeof getValues("riddleImage") === "string" && (
+                    <img className="h-32 w-32" src={getValues("riddleImage")} />
+                  )}
                   <input {...register("riddleImage")} type="file" />
 
                   <div className="h-7 text-red-500">
-                    {errors.riddleImage?.message}
+                    {errors.riddleImage?.message?.toString()}
                   </div>
                 </div>
 
@@ -215,6 +205,10 @@ const RiddleForm = ({
                   </label>
                   <div className="w-[150px]">
                     <Select
+                      initValue={{
+                        value: defaultValues.successMsgType ?? "text",
+                        label: defaultValues.successMsgType ?? "text",
+                      }}
                       options={typeOptions}
                       onChange={(value) => onSuccessTypeChange(value)}
                     />
@@ -247,6 +241,14 @@ const RiddleForm = ({
                     <label htmlFor="step" className="font-bold text-gray-600">
                       Success Message Media
                     </label>
+                    {isEdit && typeof watch("successMsgMedia") === "string" && (
+                      <MediaCheck
+                        media={getValues("successMsgMedia")}
+                        type={defaultValues.successMsgType}
+                        label={"Success Message"}
+                        index={1}
+                      />
+                    )}
                     <input
                       {...register("successMsgMedia", {
                         shouldUnregister: true,
@@ -254,7 +256,7 @@ const RiddleForm = ({
                       type="file"
                     />
                     <div className="h-7 text-red-500">
-                      {errors.successMsgMedia?.message}
+                      {errors.successMsgMedia?.message?.toString()}
                     </div>
                   </div>
                 )}
@@ -316,6 +318,16 @@ const RiddleForm = ({
                           >
                             Hint {index + 1} Media
                           </label>
+                          {isEdit &&
+                            typeof watch(`hints.${index}.media`) ===
+                              "string" && (
+                              <MediaCheck
+                                media={getValues(`hints.${index}.media`)}
+                                type={getValues(`hints.${index}.type`)}
+                                label={`Hint ${index}`}
+                                index={index}
+                              />
+                            )}
                           <input
                             {...register(`hints.${index}.media`, {
                               shouldUnregister: true,
