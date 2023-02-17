@@ -1,9 +1,9 @@
-import { userAuth } from '@/contexts/AuthContext';
-import Button from '@/shared/components/Button';
+import { userAuth } from "@/contexts/AuthContext";
+import Button from "@/shared/components/Button";
 
-import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
 const Header = () => {
   const { currentUser, logout } = userAuth();
@@ -16,7 +16,7 @@ const Header = () => {
         </Link>
         {currentUser?.uid && (
           <div className="flex gap-3">
-            <Button onClick={logout} color="google">
+            <Button onClick={logout} color="lightGray">
               <div className="flex items-center justify-between gap-2 text-sm">
                 <span>Logout</span>
                 <ArrowRightOnRectangleIcon className="h-4 text-black" />
