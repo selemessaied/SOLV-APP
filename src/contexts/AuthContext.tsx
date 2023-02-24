@@ -71,7 +71,6 @@ export const AuthProvider = ({ children }: any) => {
         return;
       })
       .catch((error) => {
-        console.log(error.toString());
         console.error(getAuthError(error.code));
         console.error(error);
         if (error.code === "auth/account-exists-with-different-credential") {

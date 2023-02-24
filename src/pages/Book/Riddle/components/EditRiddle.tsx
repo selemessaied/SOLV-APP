@@ -115,8 +115,10 @@ const EditRiddle = ({
         const oldHintsIds = riddleData.hints.map((hint: any) => hint.id);
         const newHintsIds = data.hints.map((hint: any) => hint.id);
 
-        if (data.hints.length > 0) {
-          data.hints.map(async (hint, index) => {
+        if (data.hints?.length > 0) {
+          let index = -1;
+          for (const hint of data.hints) {
+            index++;
             if (!oldHintsIds.includes(hint.id)) {
               if (hint.type !== "text") {
                 setCurrentMediaUpload(`hint ${index} media`);
@@ -125,28 +127,30 @@ const EditRiddle = ({
                   hint.media,
                   riddleId
                 );
-                return addDoc(
+                await addDoc(
                   collection(db, "books", bookId, "riddles", riddleId, "hints"),
                   {
                     text: hint.text,
                     id: hint.id,
                     media: link,
                     type: hint.type,
+                    order: hint.order,
                   }
                 );
               } else {
-                return addDoc(
+                await addDoc(
                   collection(db, "books", bookId, "riddles", riddleId, "hints"),
                   {
                     text: hint.text,
                     id: hint.id,
                     type: hint.type,
+                    order: hint.order,
                   }
                 );
               }
             }
             if (!newHintsIds.includes(hint.id)) {
-              return deleteDoc(
+              await deleteDoc(
                 doc(
                   db,
                   "books",
@@ -158,7 +162,7 @@ const EditRiddle = ({
                 )
               );
             }
-          });
+          }
         }
 
         riddleData.hints.map((hint: any) => {
@@ -177,7 +181,7 @@ const EditRiddle = ({
           }
         });
 
-        if (dirtyFields.hints.length > 0) {
+        if (dirtyFields.hints?.length > 0) {
           dirtyFields.hints.map(async (hintDirty: any, index: number) => {
             const getUpdatedHintData = () => {
               if (
@@ -226,6 +230,7 @@ const EditRiddle = ({
                 {
                   text: updatedHintData.text,
                   type: updatedHintData.type,
+                  order: updatedHintData.order,
                 },
                 { merge: true }
               );

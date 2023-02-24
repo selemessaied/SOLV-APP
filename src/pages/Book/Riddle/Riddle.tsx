@@ -9,6 +9,7 @@ import {
   deleteDoc,
   collection,
   query,
+  orderBy,
 } from "firebase/firestore";
 import { ref, deleteObject, listAll } from "firebase/storage";
 import { Fragment, useEffect, useState } from "react";
@@ -84,7 +85,8 @@ const Riddle = () => {
       let unsubHints: Unsubscribe;
       try {
         const q = query(
-          collection(db, "books", bookId!, "riddles", riddleId!, "hints")
+          collection(db, "books", bookId!, "riddles", riddleId!, "hints"),
+          orderBy("order", "asc")
         );
         unsub = onSnapshot(q, (querySnapshot) => {
           const allHints = querySnapshot.docs.map((doc) => ({

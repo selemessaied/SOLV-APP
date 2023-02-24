@@ -52,6 +52,7 @@ const riddleSchema = z
         type: z.enum(["text", "video", "image", "audio"]),
         media: z.any(),
         text: z.string().min(0).max(256).optional(),
+        order: z.number().optional(),
       })
     ),
     date: z.instanceof(Timestamp).optional(),
@@ -125,6 +126,13 @@ const RiddleForm = ({
 
   const onSub = (data: any) => {
     const hintState = getFieldState("hints");
+    if (data.hints?.length > 0) {
+      let index = 0;
+      for (const hint of data.hints) {
+        index++;
+        hint.order = index;
+      }
+    }
     onSubmit(data, dirtyFields, hintState);
   };
 

@@ -84,7 +84,9 @@ const NewRiddle = ({ onConfirmed, bookId }: NewRiddleProps) => {
           { merge: true }
         );
 
-        const promise = data.hints.map(async (hint, index) => {
+        let index = -1;
+        for (const hint of data.hints) {
+          index++;
           if (hint.type !== "text") {
             setCurrentMediaUpload(`hint ${index} media`);
             const link = await uploadFile(
@@ -92,28 +94,28 @@ const NewRiddle = ({ onConfirmed, bookId }: NewRiddleProps) => {
               hint.media,
               docRef.id
             );
-            return addDoc(
+            await addDoc(
               collection(db, "books", bookId, "riddles", docRef.id, "hints"),
               {
                 text: hint.text,
                 id: hint.id,
                 media: link,
                 type: hint.type,
+                order: hint.order,
               }
             );
           } else {
-            return addDoc(
+            await addDoc(
               collection(db, "books", bookId, "riddles", docRef.id, "hints"),
               {
                 text: hint.text,
                 id: hint.id,
                 type: hint.type,
+                order: hint.order,
               }
             );
           }
-        });
-
-        await Promise.all(promise);
+        }
 
         if (data.successMsgType !== "text") {
           setCurrentMediaUpload("success message media");
